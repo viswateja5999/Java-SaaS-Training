@@ -1,6 +1,7 @@
 package com.saas.accessmodifiers.p1;
 
 public class Person {
+    String car;//Default modifier
     private String name;
     private int age;
 

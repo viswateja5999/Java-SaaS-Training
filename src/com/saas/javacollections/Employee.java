@@ -1,6 +1,6 @@
 package com.saas.javacollections;
 
-public class Employee {
+public class Employee  {
     private  long id;
     private String name;
     private String department;

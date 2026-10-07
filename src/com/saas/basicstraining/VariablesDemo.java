@@ -1,4 +1,4 @@
-package com.saas.training;
+package com.saas.basicstraining;
 
 public class VariablesDemo {
     public static void main(String[] args){

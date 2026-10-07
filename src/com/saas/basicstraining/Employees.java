@@ -1,4 +1,4 @@
-package com.saas.training;
+package com.saas.basicstraining;
 
 public class Employees {
     static int id;

@@ -53,7 +53,7 @@ public class Main {
         EmployeeService service = new EmployeeService(employees);
 
         //Search Employee
-        Optional<Employee> employee = service.findEmployeeById(102);
+        Optional<Employee> employee = service.findEmployeeById(106);
 
         //Handle result
         employee.ifPresentOrElse(emp -> System.out.println("Employee Found: "+emp.getName()),

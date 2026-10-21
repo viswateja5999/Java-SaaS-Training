@@ -31,4 +31,22 @@ public class EmployeeController {
     public List<Employee> getAllEmployees() {
         return employeeService.getAllEmployees();
     }
+
+    @GetMapping("/{id}")
+    public Employee getEmployeeById(@PathVariable Long id) {
+        return employeeService.getEmployeeById(id);
+    }
+
+    @PutMapping("/{id}")
+    public Employee updateEmployee(
+            @PathVariable Long id,
+            @Valid @RequestBody EmployeeRequest request) {
+        return employeeService.updateEmployee(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void dalateEmployee(@PathVariable long id){
+        employeeService.deleteEmployee(id);
+    }
 }

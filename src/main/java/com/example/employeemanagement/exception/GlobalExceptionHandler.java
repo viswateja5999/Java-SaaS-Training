@@ -6,24 +6,16 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import com.example.employeemanagement.dto.ApiError;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import com.example.employeemanagement.exception.DuplicateEmployeeException;
 
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidationException(
-            MethodArgumentNotValidException exception) {
-
-        String errorMessage = exception.getBindingResult()
-                .getFieldErrors()
-                .get(0)
-                .getDefaultMessage();
-
-        return Map.of("error", errorMessage);
-    }
 
     @ExceptionHandler(EmployeeNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -37,5 +29,28 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleDataIntegrityViolation(
             DataIntegrityViolationException exception) {
         return Map.of("error", "Database constraint violation");
+    }
+
+    @ExceptionHandler(DuplicateEmployeeException.class)
+    public ResponseEntity<ApiError> handleDuplicateEmployee(
+            DuplicateEmployeeException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ApiError(ex.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidation(
+            MethodArgumentNotValidException ex) {
+
+        String message = ex.getBindingResult()
+                .getFieldErrors()
+                .get(0)
+                .getDefaultMessage();
+
+        return ResponseEntity
+                .badRequest()
+                .body(new ApiError(message));
     }
 }

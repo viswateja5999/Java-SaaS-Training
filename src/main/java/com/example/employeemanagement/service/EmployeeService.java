@@ -2,6 +2,7 @@ package com.example.employeemanagement.service;
 
 import com.example.employeemanagement.dto.EmployeeRequest;
 import com.example.employeemanagement.entity.Employee;
+import com.example.employeemanagement.exception.DuplicateEmployeeException;
 import com.example.employeemanagement.exception.EmployeeNotFoundException;
 import com.example.employeemanagement.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,10 @@ public class EmployeeService {
     }
 
     public Employee createEmployee(EmployeeRequest request) {
+
+        if(employeeRepository.existsByEmail(request.getEmail())){
+            throw new DuplicateEmployeeException("Email already exists: "+request.getEmail());
+        }
 
         Employee employee = new Employee(
                 request.getName(),
@@ -38,6 +43,10 @@ public class EmployeeService {
 
     public Employee updateEmployee(long id, EmployeeRequest request){
         Employee employee = getEmployeeById(id);
+
+        if(employeeRepository.existsByEmailAndIdNot(request.getEmail(),id)){
+            throw new DuplicateEmployeeException("Email already exists: "+request.getEmail());
+        }
 
         employee.setName(request.getName());
         employee.setEmail(request.getEmail());

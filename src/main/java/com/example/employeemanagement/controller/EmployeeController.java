@@ -3,8 +3,10 @@ package com.example.employeemanagement.controller;
 import com.example.employeemanagement.dto.EmployeeRequest;
 import com.example.employeemanagement.entity.Employee;
 import com.example.employeemanagement.service.EmployeeService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,40 +15,41 @@ import java.util.List;
 @RequestMapping("/api/v1/employees")
 public class EmployeeController {
 
-    private final EmployeeService employeeService;
+    private final EmployeeService service;
 
-    public EmployeeController(EmployeeService employeeService) {
-        this.employeeService = employeeService;
+    public EmployeeController(EmployeeService service) {
+        this.service = service;
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Employee createEmployee(
+    public ResponseEntity<Employee> create(
             @Valid @RequestBody EmployeeRequest request) {
 
-        return employeeService.createEmployee(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.create(request));
     }
 
     @GetMapping
-    public List<Employee> getAllEmployees() {
-        return employeeService.getAllEmployees();
+    public List<Employee> getAll() {
+        return service.getAll();
     }
 
     @GetMapping("/{id}")
-    public Employee getEmployeeById(@PathVariable Long id) {
-        return employeeService.getEmployeeById(id);
+    public Employee getById(@PathVariable Long id) {
+        return service.getById(id);
     }
 
     @PutMapping("/{id}")
-    public Employee updateEmployee(
+    public Employee update(
             @PathVariable Long id,
             @Valid @RequestBody EmployeeRequest request) {
-        return employeeService.updateEmployee(id, request);
+
+        return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void dalateEmployee(@PathVariable long id){
-        employeeService.deleteEmployee(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

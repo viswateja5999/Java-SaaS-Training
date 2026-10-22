@@ -2,6 +2,7 @@ package com.example.employeemanagement.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public class EmployeeRequest {
@@ -13,8 +14,9 @@ public class EmployeeRequest {
     @Email(message = "Enter a valid email")
     private String email;
 
-    @Positive(message = "Salary must be greater than zero")
-    private double salary;
+    @NotNull(message = "Salary is required")
+    @Positive(message = "Salary must be positive")
+    private Double salary;
 
     public EmployeeRequest() {
     }
@@ -23,23 +25,23 @@ public class EmployeeRequest {
         return name;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public double getSalary() {
-        return salary;
-    }
-
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
     }
 
-    public void setSalary(double salary) {
+    public Double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(Double salary) {
         this.salary = salary;
     }
 }

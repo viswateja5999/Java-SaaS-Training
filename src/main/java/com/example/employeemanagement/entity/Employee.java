@@ -1,27 +1,34 @@
 package com.example.employeemanagement.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 @Entity
+@Table(name = "employees")
 public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Name is required")
     @Column(nullable = false)
     private String name;
 
+    @NotBlank(message = "Email is required")
+    @Email(message = "Enter a valid email")
     @Column(nullable = false, unique = true)
     private String email;
 
+    @NotNull(message = "Salary is required")
+    @Positive(message = "Salary must be positive")
     @Column(nullable = false)
-    private double salary;
+    private Double salary;
 
     public Employee() {
     }
 
-    public Employee(String name, String email, double salary) {
+    public Employee(String name, String email, Double salary) {
         this.name = name;
         this.email = email;
         this.salary = salary;
@@ -35,27 +42,23 @@ public class Employee {
         return name;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public double getSalary() {
-        return salary;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
     }
 
-    public void setSalary(double salary) {
+    public Double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(Double salary) {
         this.salary = salary;
     }
 }

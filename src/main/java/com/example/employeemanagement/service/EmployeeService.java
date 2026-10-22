@@ -3,25 +3,29 @@ package com.example.employeemanagement.service;
 import com.example.employeemanagement.dto.EmployeeRequest;
 import com.example.employeemanagement.entity.Employee;
 import com.example.employeemanagement.exception.DuplicateEmployeeException;
-import com.example.employeemanagement.exception.EmployeeNotFoundException;
+import com.example.employeemanagement.exception.ResourceNotFoundException;
 import com.example.employeemanagement.repository.EmployeeRepository;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class EmployeeService {
 
-    private final EmployeeRepository employeeRepository;
+    private final EmployeeRepository repository;
 
-    public EmployeeService(EmployeeRepository employeeRepository) {
-        this.employeeRepository = employeeRepository;
+    public EmployeeService(EmployeeRepository repository) {
+        this.repository = repository;
     }
 
-    public Employee createEmployee(EmployeeRequest request) {
+    public Employee create(EmployeeRequest request) {
 
-        if(employeeRepository.existsByEmail(request.getEmail())){
-            throw new DuplicateEmployeeException("Email already exists: "+request.getEmail());
+        if (repository.existsByEmail(request.getEmail())) {
+            throw new DuplicateEmployeeException(
+                    "Email already exists: " + request.getEmail());
         }
 
         Employee employee = new Employee(
@@ -30,33 +34,41 @@ public class EmployeeService {
                 request.getSalary()
         );
 
-        return employeeRepository.save(employee);
+        return repository.save(employee);
     }
 
-    public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<Employee> getAll() {
+        return repository.findAll();
     }
 
-    public Employee getEmployeeById(Long id){
-        return employeeRepository.findById(id).orElseThrow(() -> new EmployeeNotFoundException("Employee not found with id: "+id));
+    @Transactional(readOnly = true)
+    public Employee getById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Employee not found with ID: " + id));
     }
 
-    public Employee updateEmployee(long id, EmployeeRequest request){
-        Employee employee = getEmployeeById(id);
+    public Employee update(Long id, EmployeeRequest request) {
 
-        if(employeeRepository.existsByEmailAndIdNot(request.getEmail(),id)){
-            throw new DuplicateEmployeeException("Email already exists: "+request.getEmail());
+        Employee employee = getById(id);
+
+        if (!employee.getEmail().equalsIgnoreCase(request.getEmail())
+                && repository.existsByEmail(request.getEmail())) {
+            throw new DuplicateEmployeeException(
+                    "Email already exists: " + request.getEmail());
         }
 
         employee.setName(request.getName());
         employee.setEmail(request.getEmail());
         employee.setSalary(request.getSalary());
 
-        return employeeRepository.save(employee);
+        return repository.save(employee);
     }
 
-    public void deleteEmployee(long id){
-        Employee employee = getEmployeeById(id);
-        employeeRepository.delete(employee);
+    public void delete(Long id) {
+        Employee employee = getById(id);
+        repository.delete(employee);
     }
 }

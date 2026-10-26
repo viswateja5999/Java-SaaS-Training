@@ -1,51 +1,105 @@
+
 package com.example.employeemanagement.exception;
 
+
+import com.example.employeemanagement.dto.ApiError;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.Instant;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleNotFound(
-            ResourceNotFoundException ex) {
-
-        ApiError error = new ApiError(
-                404, "Not Found", ex.getMessage());
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(error);
+            ResourceNotFoundException ex,
+            HttpServletRequest request
+    ) {
+        return buildError(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage(),
+                request
+        );
     }
 
-    @ExceptionHandler(DuplicateEmployeeException.class)
-    public ResponseEntity<ApiError> handleDuplicate(
-            DuplicateEmployeeException ex) {
-
-        ApiError error = new ApiError(
-                409, "Conflict", ex.getMessage());
-
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(error);
+    @ExceptionHandler(DuplicateCustomerException.class)
+    public ResponseEntity<ApiError> handleDuplicateCustomer(
+            DuplicateCustomerException ex,
+            HttpServletRequest request
+    ) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                ex.getMessage(),
+                request
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidation(
-            MethodArgumentNotValidException ex) {
-
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request
+    ) {
         String message = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
+                .findFirst()
                 .map(error -> error.getField() + ": "
                         + error.getDefaultMessage())
-                .findFirst()
                 .orElse("Validation failed");
 
-        ApiError error = new ApiError(
-                400, "Bad Request", message);
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                message,
+                request
+        );
+    }
 
-        return ResponseEntity.badRequest().body(error);
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleInvalidBody(
+            HttpMessageNotReadableException ex,
+            HttpServletRequest request
+    ) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "Request body is missing or invalid",
+                request
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDatabaseConflict(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request
+    ) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "Database constraint violation",
+                request
+        );
+    }
+
+    private ResponseEntity<ApiError> buildError(
+            HttpStatus status,
+            String message,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                message,
+                request.getRequestURI(),
+                Map.of()
+        );
+
+        return ResponseEntity.status(status).body(error);
     }
 }
